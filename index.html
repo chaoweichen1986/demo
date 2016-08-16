@@ -23,8 +23,107 @@
 				});
 			});
 
+			var totlebudget=8000;
+			var assessbudget=400;
+			var testfee=0;
+			var infofee=0;
+
 			function MsgToggle(mesID){
 				$("#" + mesID).toggle();
+			}
+
+			function test(){
+				var dam=$("#DamSel").val();
+				var times=$("#times").text();
+				if(times<1)
+					alert("已無測試次數！")
+				else if(dam<1){
+					if(dam==0)
+						alert("請選擇壩址！")
+					else
+						alert("你已經測試過此壩址，請選擇其他壩址！")
+				}
+				else if(confirm("確定測試"+dam+"號壩址嗎？")){
+						$("#MainPageMid").text("測試"+dam+"號壩址");
+						document.getElementById("DamSel").options[dam].value=-1;
+						$("#times").text(times-1);
+						testfee+=150;
+						calc();
+						var btnid="#TestResult"+(testfee/150);
+						$(btnid).show();
+						$(document).on("click",btnid,function(){$("#MainPageMid").text(dam+"號壩址測試結果")});
+				}
+			}
+
+			function cball(){
+				if($("#cball").prop("checked")) {
+					$('input[name="cb[]"]').each(function() {
+						if($(this).val()==1)
+							$(this).prop("checked", true);
+					});
+				}
+				else {
+					$('input[name="cb[]"]').each(function() {
+						if($(this).val()==1)
+							$(this).prop("checked", false);
+					});
+				}
+			}
+
+			function cball1(){
+				if($("#cball1").prop("checked")) {
+					$('input[name="cb1[]"]').each(function() {
+							$(this).prop("checked", true);
+					});
+				}
+				else {
+					$('input[name="cb1[]"]').each(function() {
+							$(this).prop("checked", false);
+					});
+				}
+			}
+
+			function buy(){
+				var count = 0;
+				$('input[name="cb[]"]').each(function(index) {
+					if($(this).prop("checked")&&$(this).val()==1){
+						count+=1;
+					}
+				});
+				if(count==0)
+					alert("請選擇您所需的資訊！")
+				else if(count*10>(assessbudget-infofee-testfee))
+					alert("超出預算，無法添購。")
+				else if(confirm("採購總數10份以內可測試壩址兩次\n超過僅能測試一次 請謹挑選資料\n確定添購"+count+"份資料嗎？")){
+					var cb = new Array();
+					$('input[name="cb[]"]').each(function(index) {
+						if($(this).prop("checked")){
+							$(this).prop("disabled", "disabled");
+							$(this).val("0");
+							cb[index]="true";
+						}
+					});
+					if($("#cball1").is(":hidden"))
+						$("#cball1").after($("#cball1").val()+"<br>")
+					$("#cball1").show();
+					$('input[name="cb1[]"]').each(function(index) {
+						if(cb[index]&&$(this).is(":hidden")){
+							$(this).show();
+							$(this).after($(this).val()+"<br>");
+							infofee+=10;
+						}
+					});
+					var times=Math.floor((assessbudget-testfee-infofee)/150);
+					$("#times").text(times);
+					calc();
+				}
+			}
+
+			function calc(){
+				$("#InfoFeeTd").text(infofee);
+				$("#TestFeeTd").text(testfee);
+				$("#TotalTd").text(infofee+testfee);
+				$("#balance").text(assessbudget-infofee-testfee);
 			}
 		</script>
 	</head>
@@ -47,10 +146,13 @@
 					<option value="5">5</option>
 					<option value="6">6</option>
 		    </select>
-				<button id="DamTest" onclick="">確定壩址</button>
+				<button id="DamTest" onclick="test()">測試壩址</button>
 				剩餘次數：
 				<span id="times">2</span>
-				<button id=""  onclick='MsgToggle("BudgetTable")'>經費明細一覽表</button>
+				<button id="" onclick="">確定壩址</button>
+				<button id="TestResult1" style="display:none;">第一次測試</button>
+				<button id="TestResult2" style="display:none;">第二次測試</button>
+				<button id="BudgetTableBtn"  onclick='MsgToggle("BudgetTable")'>經費明細一覽表</button>
 			</div>
 
 			<div id="MainPageLeft" style="position:absolute; top:50px; left:0px; width: 150px; height: 450px;">
@@ -62,11 +164,27 @@
 			</div>
 
 			<div id="MainPageMid" style="position:absolute; top:50px; left:150px; width: 500px; height: 450px;">
-				MainPageMid
+				壩址地圖
 			</div>
 
 			<div id="MainPageRight" style="position:absolute; top:50px; left:650px; width: 150px; height: 450px;">
-				我已購買的資料
+				我已購買的資料<br>
+				<input type="checkbox" id="cball1" name="cball1" value="全選" onclick="cball1()" style="display:none;">
+				<input type="checkbox" name="cb1[]" value="等高線" style="display:none;">
+				<input type="checkbox" name="cb1[]" value="河流水系" style="display:none;">
+				<input type="checkbox" name="cb1[]" value="土地利用" style="display:none;">
+				<input type="checkbox" name="cb1[]" value="人文史蹟" style="display:none;">
+				<input type="checkbox" name="cb1[]" value="特有物種" style="display:none;">
+				<input type="checkbox" name="cb1[]" value="地質圖" style="display:none;">
+				<input type="checkbox" name="cb1[]" value="斷層構造" style="display:none;">
+				<input type="checkbox" name="cb1[]" value="年降雨量" style="display:none;">
+				<input type="checkbox" name="cb1[]" value="聚落分布" style="display:none;">
+				<input type="checkbox" name="cb1[]" value="道路" style="display:none;">
+				<input type="checkbox" name="cb1[]" value="崩塌地分布" style="display:none;">
+				<input type="checkbox" name="cb1[]" value="各月盛行風向" style="display:none;">
+				<input type="checkbox" name="cb1[]" value="職業人口比例" style="display:none;">
+				<input type="checkbox" name="cb1[]" value="年齡層人口比例" style="display:none;">
+				<input type="checkbox" name="cb1[]" value="性別比例" style="display:none;">
 			</div>
 		</div>
 
@@ -95,10 +213,28 @@
 			<hr>
 		</div>
 
-		<div id="InfoSup" style="display:none; margin:0px auto; margin-top: -300px; position:relative; border:2px dimgray solid;border-radius:10px; width: 400px; height: 250px; background-color: white;">
+		<div id="InfoSup" style="display:none; margin:0px auto; margin-top: -300px; position:relative; border:2px dimgray solid;border-radius:10px; width: 150px; height: 450px; background-color: white;">
 			地區資訊供應站
 			<span style="position:absolute; right:5px;" onclick='MsgToggle("InfoSup")'>✕</span>
 			<hr>
+			<input type="checkbox" autocomplete="off" id="cball" name="cball" onclick="cball()">全選<br>
+			<input type="checkbox" autocomplete="off" name="cb[]" value="1">等高線<br>
+			<input type="checkbox" autocomplete="off" name="cb[]" value="1">河流水系<br>
+			<input type="checkbox" autocomplete="off" name="cb[]" value="1">土地利用<br>
+			<input type="checkbox" autocomplete="off" name="cb[]" value="1">人文史蹟<br>
+			<input type="checkbox" autocomplete="off" name="cb[]" value="1">特有物種<br>
+			<input type="checkbox" autocomplete="off" name="cb[]" value="1">地質圖<br>
+			<input type="checkbox" autocomplete="off" name="cb[]" value="1">斷層構造<br>
+			<input type="checkbox" autocomplete="off" name="cb[]" value="1">年降雨量<br>
+			<input type="checkbox" autocomplete="off" name="cb[]" value="1">聚落分布<br>
+			<input type="checkbox" autocomplete="off" name="cb[]" value="1">道路<br>
+			<input type="checkbox" autocomplete="off" name="cb[]" value="1">崩塌地分布<br>
+			<input type="checkbox" autocomplete="off" name="cb[]" value="1">各月盛行風向<br>
+			<input type="checkbox" autocomplete="off" name="cb[]" value="1">職業人口比例<br>
+			<input type="checkbox" autocomplete="off" name="cb[]" value="1">年齡層人口比例<br>
+			<input type="checkbox" autocomplete="off" name="cb[]" value="1">性別比例<br><br>
+			每份資料需10勁幣。<br>
+			<button name="" style="position:absolute; bottom:5px; right:25%;" onclick="buy()">確定購買</button>
 		</div>
 
 		<div id="hint" style="display:none; margin:0px auto; margin-top: -300px; position:relative; border:2px dimgray solid;border-radius:10px; width: 400px; height: 250px; background-color: white;">
@@ -107,10 +243,60 @@
 			<hr>
 		</div>
 
-		<div id="BudgetTable" style="display:none; margin:0px auto; margin-top: -300px; position:relative; border:2px dimgray solid;border-radius:10px; width: 400px; height: 250px; background-color: white;">
+		<div id="BudgetTable" style="display:none; margin:0px auto; margin-top: -300px; position:relative; border:2px dimgray solid;border-radius:10px; width: 200px; height: 200px; background-color: white;">
 			經費明細一覽表
 			<span style="position:absolute; right:5px;" onclick='MsgToggle("BudgetTable")'>✕</span>
 			<hr>
+			<table>
+				<tr>
+					<td>
+						總金額(單位/勁幣)
+					</td>
+					<td>
+						400
+					</td>
+				</tr>
+				<tr>
+					<td>
+						項目
+					</td>
+					<td>
+						支出
+					</td>
+				</tr>
+				<tr>
+					<td>
+						&nbsp;&nbsp;資料收集費用
+					</td>
+					<td id="InfoFeeTd">
+						0
+					</td>
+				</tr>
+				<tr>
+					<td>
+						&nbsp;&nbsp;水壩測試費
+					</td>
+					<td id="TestFeeTd">
+						0
+					</td>
+				</tr>
+				<tr>
+					<td>
+						合計
+					</td>
+					<td id="TotalTd">
+						0
+					</td>
+				</tr>
+				<tr>
+					<td>
+						剩餘金額
+					</td>
+					<td id="balance">
+						400
+					</td>
+				</tr>
+			</table>
 		</div>
 	</body>
 </html>
